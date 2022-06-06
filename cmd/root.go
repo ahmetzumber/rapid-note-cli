@@ -1,7 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -27,10 +23,21 @@ var createUserCmd = &cobra.Command{
 	Short: "This command creates a new user.",
 	Run: func(cmd *cobra.Command, args []string) {
 		newUser := user.Create(args[0])
+		user.Users = append(user.Users, newUser)
 		fmt.Println("Welcome "+ newUser + " !")
 	},
-
 }
+
+var userList = &cobra.Command{
+	Use: "list-users",
+	Short: "This command list all users.",
+	Run: func(cmd *cobra.Command, args []string) {
+		for i := 0; i < len(user.Users); i++ {
+			fmt.Println("--> "+ user.Users[i])
+		}
+	},
+}
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -52,4 +59,5 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(createUserCmd)
+	rootCmd.AddCommand(userList)
 }

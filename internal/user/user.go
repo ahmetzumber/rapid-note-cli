@@ -5,6 +5,8 @@ type User struct {
 	Email	 	string
 }
 
+var Users []string
+
 func Create(username string) string {
 	newUser := User{
 		Username: username,
