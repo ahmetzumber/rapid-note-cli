@@ -1,0 +1,19 @@
+version: '3'
+services:
+  rapid-db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "postgres-rapid"
+      POSTGRES_USER: "rapid"
+      POSTGRES_PASSWORD: "rapid1"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - rapidNetwork
+volumes:
+  postgres:
+
+networks:
+  rapidNetwork:
