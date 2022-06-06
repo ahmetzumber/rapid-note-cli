@@ -1,0 +1,32 @@
+builds:
+  - binary: rapid-note-cli
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+brews:
+  - 
+    name: rapid-note-cli
+    homepage: https://github.com/ahmetzumber/rapid-note-cli
+    tap:
+      owner: ahmetzumber
+      name: homebrew-zumbertap
+    commit_author:
+      name: ahmetzumber
+      email: ahmetzumber5@gmail.com
+
+checksum:
+  name_template: 'checksum.txt'
