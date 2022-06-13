@@ -2,11 +2,19 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ahmetzumber/rapid-note-cli/internal/postgre"
+	"github.com/ahmetzumber/rapid-note-cli/internal/repository"
 	"github.com/ahmetzumber/rapid-note-cli/internal/user"
 	"os"
 
 	"github.com/spf13/cobra"
 )
+
+type Launcher struct {
+	Repo repository.IRepository
+}
+
+var LauncherObj Launcher
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -32,8 +40,12 @@ var userList = &cobra.Command{
 	Use: "list-users",
 	Short: "This command list all users.",
 	Run: func(cmd *cobra.Command, args []string) {
-		for i := 0; i < len(user.Users); i++ {
-			fmt.Println("--> "+ user.Users[i])
+		users, err := LauncherObj.Repo.GetUsers()
+		if err != nil {
+			fmt.Printf("User list error: %s", err)
+		}
+		for i := 0; i < len(users); i++ {
+			fmt.Println("-> "+ users[i].Username)
 		}
 	},
 }
@@ -42,7 +54,12 @@ var userList = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	db, err := postgre.NewPostgreDB(postgre.Config)
+	if err != nil {
+		fmt.Printf("DB error: %s",err)
+	}
+	LauncherObj.Repo = repository.NewRepository(db)
+	err = rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
