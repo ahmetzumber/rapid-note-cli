@@ -1,28 +1,29 @@
-## Rapid Note ⚡️
+## Rapid Note ⚡️ --- (IN DEVELOPMENT)
 
 Rapid note provides you taking a notes dynamically from terminal.
 
 ##  Project Structure
 ```
-├─ .github       //ci-cd pipeline folder
-├─ cmd           //root file here
-├─ go.mod        //3rd party libraries
-├─ go.sum        //Sums and versions of 3rd party libraries
+├─ .github       // ci-cd pipeline folder
+├─ cmd           // root file here
+├─ go.mod        // 3rd party libraries
+├─ go.sum        // sums and versions of 3rd party libraries
 └─ internal
-   ├─ model                  //Models for every type of object
-   ├─ repository             //Repository Layer
-       └─ driver             //Repository Layer for driver
+   ├─ config            // db and request types
+   ├─ postgre           // postgre instance and DSN
+   ├─ repository        // data fetching layer from db
+   └─ user              // user modal type
 ```
 
 ### Create a profile
 ```bash
-$ rapidnote create user="ahmetzumber"
+$ rapidnote create-user "Ahmet" "ahmetzumber5@gmail.com"
 ```
 
 ### Write your note
 
 ```bash
-$ rapidnote take "your notes"
+$ rapidnote write "your note"
 ```
 
 ### List your notes
