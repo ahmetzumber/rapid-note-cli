@@ -33,8 +33,21 @@ func (r *Repository) GetUsers() ([]user.User, error) {
 	return users, nil
 }
 
-func (r *Repository) AddUser(user config.CreateUserRequest) (user.User, error) {
-	panic("implement me")
+func (r *Repository) AddUser(userRequest config.CreateUserRequest) (user.User, error) {
+	newUser := user.User{
+		Username: userRequest.Username,
+		Email:    userRequest.Email,
+	}
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(newUser).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return user.User{}, nil
+	}
+	return newUser, nil
 }
 
 
