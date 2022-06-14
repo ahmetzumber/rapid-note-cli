@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ahmetzumber/rapid-note-cli/internal/config"
 	"github.com/ahmetzumber/rapid-note-cli/internal/postgre"
 	"github.com/ahmetzumber/rapid-note-cli/internal/repository"
-	"github.com/ahmetzumber/rapid-note-cli/internal/user"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -30,9 +30,11 @@ var createUserCmd = &cobra.Command{
 	Use: "create",
 	Short: "This command creates a new user.",
 	Run: func(cmd *cobra.Command, args []string) {
-		newUser := user.Create(args[0])
-		user.Users = append(user.Users, newUser)
-		fmt.Println("Welcome "+ newUser + " !")
+		LauncherObj.Repo.AddUser(config.CreateUserRequest{
+			Username: args[0],
+			Email:    args[1],
+		})
+		fmt.Println("Welcome "+ args[0] + " !")
 	},
 }
 
