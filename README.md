@@ -12,7 +12,7 @@ Rapid note provides you taking a notes dynamically from terminal.
    ├─ config            // db and request types
    ├─ postgre           // postgre instance and DSN
    ├─ repository        // data fetching layer from db
-   └─ user              // user modal type
+   └─ modal             // modal types here
 ```
 
 ### Create a profile
