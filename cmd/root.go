@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/ahmetzumber/rapid-note-cli/internal/config"
+	"github.com/ahmetzumber/rapid-note-cli/internal/modal"
 	"github.com/ahmetzumber/rapid-note-cli/internal/postgre"
 	"github.com/ahmetzumber/rapid-note-cli/internal/repository"
 	"os"
@@ -11,7 +12,9 @@ import (
 )
 
 type Launcher struct {
-	Repo repository.IRepository
+	Repo        		repository.IRepository
+	CurrentUser			modal.User
+	CurrentUserNote  	modal.Note
 }
 
 var LauncherObj Launcher
@@ -28,17 +31,21 @@ var rootCmd = &cobra.Command{
 
 var createUserCmd = &cobra.Command{
 	Use: "create",
-	Short: "This command creates a new user.",
+	Short: "This command creates a new modal.",
 	Run: func(cmd *cobra.Command, args []string) {
 		LauncherObj.Repo.AddUser(config.CreateUserRequest{
 			Username: args[0],
 			Email:    args[1],
 		})
+		LauncherObj.CurrentUser = modal.User{
+			Username: args[0],
+			Email:    args[1],
+		}
 		fmt.Println("Welcome "+ args[0] + " !")
 	},
 }
 
-var userList = &cobra.Command{
+var userListCmd = &cobra.Command{
 	Use: "list-users",
 	Short: "This command list all users.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -52,6 +59,27 @@ var userList = &cobra.Command{
 	},
 }
 
+var writeNoteCmd = &cobra.Command{
+	Use: "write",
+	Short: "With this command you can write your notes properly.",
+	Run: func(cmd *cobra.Command, args []string) {
+		LauncherObj.Repo.AddNote(config.CreateNoteRequest{
+			Data: args[0],
+		})
+		newNote := modal.Note{
+			Data: args[0],
+		}
+		LauncherObj.CurrentUserNote = newNote
+	},
+}
+
+var test = &cobra.Command{
+	Use: "test",
+	Short: "test command",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(LauncherObj.CurrentUserNote.Data)
+	},
+}
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -78,5 +106,7 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(createUserCmd)
-	rootCmd.AddCommand(userList)
+	rootCmd.AddCommand(userListCmd)
+	rootCmd.AddCommand(writeNoteCmd)
+	rootCmd.AddCommand(test)
 }
