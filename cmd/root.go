@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ahmetzumber/rapid-note-cli/internal/config"
 	"github.com/ahmetzumber/rapid-note-cli/internal/modal"
 	"github.com/ahmetzumber/rapid-note-cli/internal/postgre"
 	"github.com/ahmetzumber/rapid-note-cli/internal/repository"
@@ -33,7 +32,7 @@ var createUserCmd = &cobra.Command{
 	Use: "create",
 	Short: "This command creates a new modal.",
 	Run: func(cmd *cobra.Command, args []string) {
-		LauncherObj.Repo.AddUser(config.CreateUserRequest{
+		LauncherObj.Repo.AddUser(modal.User{
 			Username: args[0],
 			Email:    args[1],
 		})
@@ -63,10 +62,12 @@ var writeNoteCmd = &cobra.Command{
 	Use: "write",
 	Short: "With this command you can write your notes properly.",
 	Run: func(cmd *cobra.Command, args []string) {
-		LauncherObj.Repo.AddNote(config.CreateNoteRequest{
+		LauncherObj.Repo.AddNote(modal.Note{
+			UserID: LauncherObj.CurrentUser.ID,
 			Data: args[0],
 		})
 		newNote := modal.Note{
+			UserID: LauncherObj.CurrentUser.ID,
 			Data: args[0],
 		}
 		LauncherObj.CurrentUserNote = newNote
@@ -77,7 +78,9 @@ var test = &cobra.Command{
 	Use: "test",
 	Short: "test command",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(LauncherObj.CurrentUserNote.Data)
+		fmt.Println(LauncherObj.CurrentUser.ID)
+		fmt.Println(LauncherObj.CurrentUser.Username)
+		fmt.Println(LauncherObj.CurrentUser.Email)
 	},
 }
 
