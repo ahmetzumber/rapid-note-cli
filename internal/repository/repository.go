@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"github.com/ahmetzumber/rapid-note-cli/internal/config"
 	"github.com/ahmetzumber/rapid-note-cli/internal/modal"
 	"gorm.io/gorm"
 )
 
 type IRepository interface {
 	GetUsers() ([]modal.User, error)
-	AddUser(createUser config.CreateUserRequest) (modal.User, error)
-	AddNote(createNote config.CreateNoteRequest) (modal.Note, error)
+	AddUser(createUser modal.User) (modal.User, error)
+	AddNote(createNote modal.Note) (modal.Note, error)
 }
 
 type Repository struct {
@@ -18,6 +17,10 @@ type Repository struct {
 
 func NewRepository(db *gorm.DB) IRepository {
 	return &Repository{db: db}
+}
+
+func Migrate(db *gorm.DB) {
+	db.AutoMigrate(modal.User{}, modal.Note{})
 }
 
 func (r *Repository) GetUsers() ([]modal.User, error) {
@@ -34,13 +37,9 @@ func (r *Repository) GetUsers() ([]modal.User, error) {
 	return users, nil
 }
 
-func (r *Repository) AddUser(userRequest config.CreateUserRequest) (modal.User, error) {
-	newUser := modal.User{
-		Username: userRequest.Username,
-		Email:    userRequest.Email,
-	}
+func (r *Repository) AddUser(userRequest modal.User) (modal.User, error) {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(newUser).Error; err != nil {
+		if err := tx.Create(&userRequest).Error; err != nil {
 			return err
 		}
 		return nil
@@ -48,15 +47,12 @@ func (r *Repository) AddUser(userRequest config.CreateUserRequest) (modal.User, 
 	if err != nil {
 		return modal.User{}, nil
 	}
-	return newUser, nil
+	return userRequest, nil
 }
 
-func (r *Repository) AddNote(noteRequest config.CreateNoteRequest) (modal.Note, error) {
-	newNote := modal.Note{
-		Data: noteRequest.Data,
-	}
+func (r *Repository) AddNote(noteRequest modal.Note) (modal.Note, error) {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(newNote).Error; err != nil {
+		if err := tx.Create(&noteRequest).Error; err != nil {
 			return err
 		}
 		return nil
@@ -64,6 +60,6 @@ func (r *Repository) AddNote(noteRequest config.CreateNoteRequest) (modal.Note, 
 	if err != nil {
 		return modal.Note{}, nil
 	}
-	return newNote, nil
+	return noteRequest, nil
 }
 
