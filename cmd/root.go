@@ -5,6 +5,7 @@ import (
 	"github.com/ahmetzumber/rapid-note-cli/internal/modal"
 	"github.com/ahmetzumber/rapid-note-cli/internal/postgre"
 	"github.com/ahmetzumber/rapid-note-cli/internal/repository"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -12,13 +13,10 @@ import (
 
 type Launcher struct {
 	Repo        		repository.IRepository
-	CurrentUser			modal.User
-	CurrentUserNote  	modal.Note
 }
 
 var LauncherObj Launcher
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "rapid-note-cli",
 	Short: "Rapid note provides you taking a notes dynamically from terminal.",
@@ -36,10 +34,7 @@ var createUserCmd = &cobra.Command{
 			Username: args[0],
 			Email:    args[1],
 		})
-		LauncherObj.CurrentUser = modal.User{
-			Username: args[0],
-			Email:    args[1],
-		}
+		WriteCurrentUser(args[0])
 		fmt.Println("Welcome "+ args[0] + " !")
 	},
 }
@@ -63,14 +58,21 @@ var writeNoteCmd = &cobra.Command{
 	Short: "With this command you can write your notes properly.",
 	Run: func(cmd *cobra.Command, args []string) {
 		LauncherObj.Repo.AddNote(modal.Note{
-			UserID: LauncherObj.CurrentUser.ID,
+			UserID: LauncherObj.Repo.GetUserIDByUsername(GetCurrentUser()),	// you will write your note to current user
 			Data: args[0],
 		})
-		newNote := modal.Note{
-			UserID: LauncherObj.CurrentUser.ID,
-			Data: args[0],
+	},
+}
+
+var getCurrentUserNotesCmd = &cobra.Command{
+	Use: "list-notes",
+	Short: "This command list your all notes.",
+	Run: func(cmd *cobra.Command, args []string) {
+		currentUserID := LauncherObj.Repo.GetUserIDByUsername(GetCurrentUser())
+		notes := LauncherObj.Repo.GetCurrentUserNotesByUserID(currentUserID)
+		for i := 0; i < len(notes); i++ {
+			fmt.Println("-> "+ notes[i].Data)
 		}
-		LauncherObj.CurrentUserNote = newNote
 	},
 }
 
@@ -78,38 +80,53 @@ var test = &cobra.Command{
 	Use: "test",
 	Short: "test command",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(LauncherObj.CurrentUser.ID)
-		fmt.Println(LauncherObj.CurrentUser.Username)
-		fmt.Println(LauncherObj.CurrentUser.Email)
+		fmt.Println(GetCurrentUser())
+		fmt.Println(LauncherObj.Repo.GetUserIDByUsername(GetCurrentUser()))
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	db, err := postgre.NewPostgreDB(postgre.Config)
 	if err != nil {
 		fmt.Printf("DB error: %s",err)
 	}
 	LauncherObj.Repo = repository.NewRepository(db)
+	repository.Migrate(db)
 	err = rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
+func WriteCurrentUser(user string) error {
+	d1 := []byte(user)
+	f, err := os.Create("cmd/currentUser")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = os.WriteFile("cmd/currentUser", d1, 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer f.Close()
+	return err
+}
+
+func GetCurrentUser() string {
+	user, err := os.ReadFile("cmd/currentUser")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return string(user)
+}
+
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rapid-note-cli.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(createUserCmd)
 	rootCmd.AddCommand(userListCmd)
 	rootCmd.AddCommand(writeNoteCmd)
 	rootCmd.AddCommand(test)
+	rootCmd.AddCommand(getCurrentUserNotesCmd)
 }
