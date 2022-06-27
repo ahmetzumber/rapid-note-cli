@@ -3,12 +3,15 @@ package repository
 import (
 	"github.com/ahmetzumber/rapid-note-cli/internal/modal"
 	"gorm.io/gorm"
+	"log"
 )
 
 type IRepository interface {
 	GetUsers() ([]modal.User, error)
 	AddUser(createUser modal.User) (modal.User, error)
 	AddNote(createNote modal.Note) (modal.Note, error)
+	GetUserIDByUsername(username string) int
+	GetCurrentUserNotesByUserID(userID int) []modal.Note
 }
 
 type Repository struct {
@@ -20,7 +23,7 @@ func NewRepository(db *gorm.DB) IRepository {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(modal.User{}, modal.Note{})
+	db.AutoMigrate(modal.Note{})
 }
 
 func (r *Repository) GetUsers() ([]modal.User, error) {
@@ -63,3 +66,30 @@ func (r *Repository) AddNote(noteRequest modal.Note) (modal.Note, error) {
 	return noteRequest, nil
 }
 
+func (r *Repository) GetUserIDByUsername(username string) int {
+	var user modal.User
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where(&modal.User{ Username: username }).First(&user).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return user.ID
+}
+
+func (r *Repository) GetCurrentUserNotesByUserID(userID int) []modal.Note {
+	var notes []modal.Note
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where(&modal.Note{ UserID: userID }).Find(&notes).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return notes
+}
