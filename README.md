@@ -4,10 +4,11 @@ Rapid note provides you taking a notes dynamically from terminal.
 
 ##  Project Structure
 ```
-├─ .github       // ci-cd pipeline folder
-├─ cmd           // root file here
-├─ go.mod        // 3rd party libraries
-├─ go.sum        // sums and versions of 3rd party libraries
+├─ .github              // ci-cd pipeline folder
+└─ cmd                  // root file here
+    └─ currentUser      // reading and writing current user data
+├─ go.mod               // 3rd party libraries
+├─ go.sum               // sums and versions of 3rd party libraries
 └─ internal
    ├─ config            // db and request types
    ├─ postgre           // postgre instance and DSN
@@ -15,9 +16,12 @@ Rapid note provides you taking a notes dynamically from terminal.
    └─ modal             // modal types here
 ```
 
+###  Database Model
+![img](https://raw.githubusercontent.com/ahmetzumber/rapid-note-cli/master/internal/config/db-model.png)
+
 ### Create a profile
 ```bash
-$ rapidnote create-user "Ahmet" "ahmetzumber5@gmail.com"
+$ rapidnote create "Ahmet" "ahmetzumber5@gmail.com"
 ```
 
 ### Write your note
@@ -28,21 +32,7 @@ $ rapidnote write "your note"
 
 ### List your notes
 ```bash
-$ rapidnote notes 
+$ rapidnote list-notes
 - "your note 1"
 - "your note 2"
-```
-
-### Delete your note
-```bash
-$ rapidnote delete
-- "your note 1" <
-- "your note 2" 
-```
-
-### Delete profile
-```bash
-$ rapidnote users delete
-- "ahmetzumber" <
-- "zumber2" 
 ```
